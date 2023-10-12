@@ -1,0 +1,11 @@
+{
+  "debug": true,
+  "log_level": "info",
+  "server": {
+    "address": ":8080"
+  },
+  "database": {
+    "driver": "postgres",
+    "url": "postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName"
+  }
+}
