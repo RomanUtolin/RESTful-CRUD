@@ -6,6 +6,11 @@
   },
   "database": {
     "driver": "postgres",
-    "url": "postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName"
+    "host": "ps-psql ",
+    "port": "5432",
+    "user": "postgres",
+    "pass": "password",
+    "name": "dev",
+    "sslmode": "disable"
   }
 }

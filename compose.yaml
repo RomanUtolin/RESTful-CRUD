@@ -1,0 +1,28 @@
+services:
+  app:
+    image: app-server-crud
+    container_name: ps-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresql
+    volumes:
+      - ./configs/server.json:/configs/server.json
+    networks:
+      - ps
+
+  postgresql:
+    image: postgres:14-alpine
+    container_name: ps-psql
+    ports:
+      - "6432:5432"
+    environment:
+      - POSTGRES_DB=dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./migrations/create.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ps
+networks:
+  ps:

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/constants"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/http"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/http/middleware"
@@ -29,7 +30,14 @@ func init() {
 
 func main() {
 	dbDriver := viper.GetString("database.driver")
-	dbUrl := viper.GetString("database.url")
+	dbHost := viper.GetString(`database.host`)
+	dbPort := viper.GetString(`database.port`)
+	dbUser := viper.GetString(`database.user`)
+	dbPass := viper.GetString(`database.pass`)
+	dbName := viper.GetString(`database.name`)
+	sslMode := viper.GetString(`database.sslmode`)
+	dbUrl := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		dbHost, dbPort, dbUser, dbPass, dbName, sslMode)
 	ctx := context.WithValue(context.Background(), constants.DatabaseDriver, dbDriver)
 	ctx = context.WithValue(ctx, constants.DatabaseURL, dbUrl)
 

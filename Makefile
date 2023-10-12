@@ -6,9 +6,9 @@ build:
 test:
 		go test -v -race -timeout 30s ./...
 
-.PHONY: lint
-lint: $(GOLANGCI) ## Runs golangci-lint with predefined configuration
-	@echo "Applying linter"
-	golangci-lint version
-	golangci-lint run -c .golangci.yaml ./...
+.PHONY: start
+start:
+	docker build -t app-server-crud .
+	docker compose up
+
 .DEFAULT_GOAL := build
