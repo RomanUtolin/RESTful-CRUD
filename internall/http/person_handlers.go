@@ -76,7 +76,7 @@ func (h *Handler) UpdatePerson(c echo.Context) error {
 		return getError(c, err)
 	}
 	req := &entity.Person{}
-	if err := newPerson(c, req); err != nil {
+	if err = newPerson(c, req); err != nil {
 		return getError(c, err)
 	}
 	ctx := newContext(c)
