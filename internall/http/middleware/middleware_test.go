@@ -1,7 +1,6 @@
 package middleware_test
 
 import (
-	"context"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/http/middleware"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +15,7 @@ func TestCORS(t *testing.T) {
 	req := httptest.NewRequest(echo.GET, "/", nil)
 	rec := httptest.NewRecorder()
 	ctx := server.NewContext(req, rec)
-	middl := middleware.InitMiddleware(context.Background())
+	middl := middleware.InitMiddleware()
 
 	handler := middl.CORS(echo.HandlerFunc(func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)

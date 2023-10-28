@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
-	"github.com/RomanUtolin/RESTful-CRUD/internall/constants"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -16,8 +16,7 @@ func init() {
 	}
 }
 
-func GetConfigDb() context.Context {
-	dbDriver := viper.GetString("database.driver")
+func GetConfigDb() string {
 	dbHost := viper.GetString(`database.host`)
 	dbPort := viper.GetString(`database.port`)
 	dbUser := viper.GetString(`database.user`)
@@ -26,9 +25,7 @@ func GetConfigDb() context.Context {
 	sslMode := viper.GetString(`database.sslmode`)
 	dbUrl := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		dbHost, dbPort, dbUser, dbPass, dbName, sslMode)
-	ctx := context.WithValue(context.Background(), constants.DatabaseDriver, dbDriver)
-	ctx = context.WithValue(ctx, constants.DatabaseURL, dbUrl)
-	return ctx
+	return dbUrl
 }
 
 func GetLogger() {
@@ -38,4 +35,14 @@ func GetLogger() {
 	if viper.GetBool("debug") {
 		logrus.Infof("Service RUN on DEBUG mode")
 	}
+}
+
+func GetDb() *pgxpool.Pool {
+	ctx := context.Background()
+	dbUrl := GetConfigDb()
+	dbPool, err := pgxpool.New(ctx, dbUrl)
+	if err != nil {
+		logrus.Warning(err)
+	}
+	return dbPool
 }

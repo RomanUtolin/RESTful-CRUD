@@ -8,7 +8,6 @@ import (
 	"github.com/RomanUtolin/RESTful-CRUD/mocks"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
@@ -42,7 +41,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", mock.Anything).Return(ListPerson, nil)
+				mockUCase.On("GetAll", "", "", "", 1, 10).Return(ListPerson, nil)
 			},
 			waitCode:     http.StatusOK,
 			waitResponse: string(jsonListPerson),
@@ -50,7 +49,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", mock.Anything).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetAll", "", "", "", 1, 10).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitCode:     http.StatusInternalServerError,
 			waitResponse: `{"message":"internal Server Error"}`,
@@ -93,7 +92,7 @@ func TestHandler_GetPerson(t *testing.T) {
 			name: "valid",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(testPerson, nil)
+				mockUCase.On("GetByID", testPerson.ID).Return(testPerson, nil)
 			},
 			waitCode:     http.StatusOK,
 			waitResponse: string(PersonJson),
@@ -102,7 +101,7 @@ func TestHandler_GetPerson(t *testing.T) {
 			name: "store error",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetByID", testPerson.ID).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitCode:     http.StatusInternalServerError,
 			waitResponse: `{"message":"internal Server Error"}`,
@@ -111,7 +110,7 @@ func TestHandler_GetPerson(t *testing.T) {
 			name: "id valid, in db not found",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(nil, serverErr.ErrNotFound)
+				mockUCase.On("GetByID", testPerson.ID).Return(nil, serverErr.ErrNotFound)
 			},
 			waitCode:     http.StatusNotFound,
 			waitResponse: `{"message":"your requested item is not found"}`,
@@ -163,7 +162,7 @@ func TestHandler_CreatePerson(t *testing.T) {
 			name: "valid",
 			data: PersonJson,
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Create", mock.Anything, testPerson).Return(testPerson, nil)
+				mockUCase.On("Create", testPerson).Return(testPerson, nil)
 			},
 			waitCode:     http.StatusCreated,
 			waitResponse: string(PersonJson),
@@ -172,7 +171,7 @@ func TestHandler_CreatePerson(t *testing.T) {
 			name: "store error",
 			data: PersonJson,
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Create", mock.Anything, testPerson).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("Create", testPerson).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitCode:     http.StatusInternalServerError,
 			waitResponse: `{"message":"internal Server Error"}`,
@@ -188,7 +187,7 @@ func TestHandler_CreatePerson(t *testing.T) {
 			name: "Conflict Data in db",
 			data: PersonJson,
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Create", mock.Anything, testPerson).Return(nil, serverErr.ErrConflict)
+				mockUCase.On("Create", testPerson).Return(nil, serverErr.ErrConflict)
 			},
 			waitCode:     http.StatusConflict,
 			waitResponse: `{"message":"your email already exist, must be unique"}`,
@@ -233,7 +232,7 @@ func TestHandler_UpdatePerson(t *testing.T) {
 			id:   "1",
 			data: PersonJson,
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Update", mock.Anything, testPerson.ID, testPerson).Return(testPerson, nil)
+				mockUCase.On("Update", testPerson.ID, testPerson).Return(testPerson, nil)
 			},
 			waitCode:     http.StatusCreated,
 			waitResponse: string(PersonJson),
@@ -243,7 +242,7 @@ func TestHandler_UpdatePerson(t *testing.T) {
 			id:   "1",
 			data: PersonJson,
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Update", mock.Anything, testPerson.ID, testPerson).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("Update", testPerson.ID, testPerson).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitCode:     http.StatusInternalServerError,
 			waitResponse: `{"message":"internal Server Error"}`,
@@ -261,7 +260,7 @@ func TestHandler_UpdatePerson(t *testing.T) {
 			id:   "1",
 			data: PersonJson,
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Update", mock.Anything, testPerson.ID, testPerson).Return(nil, serverErr.ErrConflict)
+				mockUCase.On("Update", testPerson.ID, testPerson).Return(nil, serverErr.ErrConflict)
 			},
 			waitCode:     http.StatusConflict,
 			waitResponse: `{"message":"your email already exist, must be unique"}`,
@@ -310,7 +309,7 @@ func TestHandler_DeletePerson(t *testing.T) {
 			name: "valid",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Delete", mock.Anything, testPerson.ID).Return(nil)
+				mockUCase.On("Delete", testPerson.ID).Return(nil)
 			},
 			waitCode:     http.StatusNoContent,
 			waitResponse: "",
@@ -319,7 +318,7 @@ func TestHandler_DeletePerson(t *testing.T) {
 			name: "store error",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Delete", mock.Anything, testPerson.ID).Return(serverErr.ErrInternalServer)
+				mockUCase.On("Delete", testPerson.ID).Return(serverErr.ErrInternalServer)
 			},
 			waitCode:     http.StatusInternalServerError,
 			waitResponse: `{"message":"internal Server Error"}`,
@@ -328,7 +327,7 @@ func TestHandler_DeletePerson(t *testing.T) {
 			name: "id valid, in db not found",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("Delete", mock.Anything, testPerson.ID).Return(serverErr.ErrNotFound)
+				mockUCase.On("Delete", testPerson.ID).Return(serverErr.ErrNotFound)
 			},
 			waitCode:     http.StatusNotFound,
 			waitResponse: `{"message":"your requested item is not found"}`,

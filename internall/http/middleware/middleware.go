@@ -1,16 +1,12 @@
 package middleware
 
 import (
-	"context"
-	"github.com/RomanUtolin/RESTful-CRUD/internall/constants"
-	"github.com/gocraft/dbr/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"time"
 )
 
 type GoMiddleware struct {
-	ctx context.Context
 }
 
 func (m *GoMiddleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
@@ -35,35 +31,6 @@ func (m *GoMiddleware) LogRequest(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (m *GoMiddleware) DbSession(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		dbSession := newDbSession(m.ctx)
-		c.Set(constants.DbSession, dbSession)
-		c.Response().After(func() {
-			err := dbSession.Close()
-			if err != nil {
-				logrus.Warning(err)
-			}
-		})
-		return next(c)
-	}
-}
-
-func InitMiddleware(ctx context.Context) *GoMiddleware {
-	return &GoMiddleware{ctx: ctx}
-}
-
-func newDbSession(ctx context.Context) *dbr.Session {
-	dbDriver := ctx.Value(constants.DatabaseDriver).(string)
-	dbUrl := ctx.Value(constants.DatabaseURL).(string)
-	dbConn, err := dbr.Open(dbDriver, dbUrl, nil)
-	if err != nil {
-		logrus.Warning(err)
-	}
-	err = dbConn.Ping()
-	if err != nil {
-		logrus.Warning(err)
-	}
-	dbSession := dbConn.NewSession(nil)
-	return dbSession
+func InitMiddleware() *GoMiddleware {
+	return &GoMiddleware{}
 }

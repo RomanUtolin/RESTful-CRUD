@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"context"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/entity"
 	serverErr "github.com/RomanUtolin/RESTful-CRUD/internall/errors"
 )
@@ -14,45 +13,48 @@ func NewPersonLogic(rep entity.PersonRepository) entity.PersonLogic {
 	return &PersonLogic{rep}
 }
 
-func (p *PersonLogic) GetAll(ctx context.Context) ([]*entity.Person, error) {
-	return p.Rep.GetAll(ctx)
+func (p *PersonLogic) GetAll(email, phone, firstName string, page, limit int) ([]*entity.Person, error) {
+	return p.Rep.GetAll(email, phone, firstName, page, limit)
 }
 
-func (p *PersonLogic) GetByID(ctx context.Context, id int) (*entity.Person, error) {
-	person, err := p.Rep.GetByID(ctx, id)
+func (p *PersonLogic) GetByID(id int) (*entity.Person, error) {
+	person, err := p.Rep.GetByID(id)
 	if person == nil && err == nil {
 		err = serverErr.ErrNotFound
 	}
 	return person, err
 }
 
-func (p *PersonLogic) GetByEmail(ctx context.Context, email string) (*entity.Person, error) {
-	return p.Rep.GetByEmail(ctx, email)
+func (p *PersonLogic) GetByEmail(email string) (*entity.Person, error) {
+	return p.Rep.GetByEmail(email)
 }
 
-func (p *PersonLogic) Create(ctx context.Context, req *entity.Person) (*entity.Person, error) {
-	if err := p.findPerson(ctx, req.Email); err != nil {
+func (p *PersonLogic) Create(req *entity.Person) (*entity.Person, error) {
+	if err := p.findPerson(req.Email); err != nil {
 		return nil, err
 	}
-	return p.Rep.Create(ctx, req)
+	return p.Rep.Create(req)
 }
 
-func (p *PersonLogic) Update(ctx context.Context, id int, req *entity.Person) (*entity.Person, error) {
-	if _, err := p.GetByID(ctx, id); err != nil {
+func (p *PersonLogic) Update(id int, req *entity.Person) (*entity.Person, error) {
+	if _, err := p.GetByID(id); err != nil {
 		return nil, err
 	}
-	if err := p.findPerson(ctx, req.Email); err != nil {
+	if err := p.findPerson(req.Email); err != nil {
 		return nil, err
 	}
-	return p.Rep.Update(ctx, id, req)
+	return p.Rep.Update(id, req)
 }
 
-func (p *PersonLogic) Delete(ctx context.Context, id int) error {
-	return p.Rep.Delete(ctx, id)
+func (p *PersonLogic) Delete(id int) error {
+	return p.Rep.Delete(id)
+}
+func (p *PersonLogic) Count() (int, error) {
+	return p.Rep.Count()
 }
 
-func (p *PersonLogic) findPerson(ctx context.Context, email string) error {
-	person, err := p.GetByEmail(ctx, email)
+func (p *PersonLogic) findPerson(email string) error {
+	person, err := p.GetByEmail(email)
 	if person != nil && err == nil {
 		err = serverErr.ErrConflict
 	}

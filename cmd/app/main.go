@@ -7,20 +7,19 @@ import (
 	_repository "github.com/RomanUtolin/RESTful-CRUD/internall/repository"
 	"github.com/RomanUtolin/RESTful-CRUD/pkg/config"
 	"github.com/labstack/echo/v4"
-	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
 	config.GetLogger()
-	ctx := config.GetConfigDb()
+	dbPoll := config.GetDb()
+	defer dbPoll.Close()
 	server := echo.New()
-	middl := middleware.InitMiddleware(ctx)
+	middl := middleware.InitMiddleware()
 	server.Use(middl.CORS)
 	server.Use(middl.LogRequest)
-	server.Use(middl.DbSession)
-	repository := _repository.NewPersonRepository()
+	repository := _repository.NewPersonRepository(dbPoll)
 	logic := _logic.NewPersonLogic(repository)
 	http.NewHandler(server, logic)
 

@@ -1,20 +1,16 @@
 package http
 
 import (
-	"context"
 	"errors"
-	"github.com/RomanUtolin/RESTful-CRUD/internall/constants"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/entity"
 	serverErr "github.com/RomanUtolin/RESTful-CRUD/internall/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+	"math"
 	"net/http"
 	"strconv"
-	"sync"
 )
-
-var lock = sync.Mutex{}
 
 type Handler struct {
 	Logic entity.PersonLogic
@@ -25,26 +21,42 @@ type ResponseError struct {
 }
 
 func (h *Handler) GetAllPerson(c echo.Context) error {
-	lock.Lock()
-	defer lock.Unlock()
-	ctx := newContext(c)
-	persons, err := h.Logic.GetAll(ctx)
+	email := c.QueryParam("email")
+	phone := c.QueryParam("phone")
+	firstName := c.QueryParam("first_name")
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		limit = 10
+	}
+	persons, err := h.Logic.GetAll(email, phone, firstName, page, limit)
 	if err != nil {
 		return getError(c, err)
 	}
+	total, err := h.Logic.Count()
+	if err != nil {
+		return getError(c, err)
+	}
+	lastPage := int(math.Ceil(float64(total) / float64(limit)))
+	data := echo.Map{
+		"data":      persons,
+		"total":     total,
+		"page":      page,
+		"last_page": lastPage,
+	}
 	logrus.Info("Get all person Successful")
-	return c.JSON(http.StatusOK, persons)
+	return c.JSON(http.StatusOK, data)
 }
 
 func (h *Handler) GetPerson(c echo.Context) error {
-	lock.Lock()
-	defer lock.Unlock()
 	id, err := parseId(c)
 	if err != nil {
 		return getError(c, err)
 	}
-	ctx := newContext(c)
-	person, err := h.Logic.GetByID(ctx, id)
+	person, err := h.Logic.GetByID(id)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -53,14 +65,11 @@ func (h *Handler) GetPerson(c echo.Context) error {
 }
 
 func (h *Handler) CreatePerson(c echo.Context) error {
-	lock.Lock()
-	defer lock.Unlock()
 	req := &entity.Person{}
 	if err := newPerson(c, req); err != nil {
 		return getError(c, err)
 	}
-	ctx := newContext(c)
-	person, err := h.Logic.Create(ctx, req)
+	person, err := h.Logic.Create(req)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -69,8 +78,6 @@ func (h *Handler) CreatePerson(c echo.Context) error {
 }
 
 func (h *Handler) UpdatePerson(c echo.Context) error {
-	lock.Lock()
-	defer lock.Unlock()
 	id, err := parseId(c)
 	if err != nil {
 		return getError(c, err)
@@ -79,8 +86,7 @@ func (h *Handler) UpdatePerson(c echo.Context) error {
 	if err = newPerson(c, req); err != nil {
 		return getError(c, err)
 	}
-	ctx := newContext(c)
-	person, err := h.Logic.Update(ctx, id, req)
+	person, err := h.Logic.Update(id, req)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -89,14 +95,11 @@ func (h *Handler) UpdatePerson(c echo.Context) error {
 }
 
 func (h *Handler) DeletePerson(c echo.Context) error {
-	lock.Lock()
-	defer lock.Unlock()
 	id, err := parseId(c)
 	if err != nil {
 		return getError(c, err)
 	}
-	ctx := newContext(c)
-	err = h.Logic.Delete(ctx, id)
+	err = h.Logic.Delete(id)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -160,8 +163,4 @@ func getError(c echo.Context, err error) error {
 		code = http.StatusInternalServerError
 	}
 	return c.JSON(code, ResponseError{Message: err.Error()})
-}
-
-func newContext(c echo.Context) context.Context {
-	return context.WithValue(c.Request().Context(), constants.DbSession, c.Get(constants.DbSession))
 }
