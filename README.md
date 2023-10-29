@@ -25,6 +25,17 @@ make start
 # Return all person
 GET /person
 
+Query param:
+    email=
+    phone=
+    first_name=
+    page=
+    limit=
+
+    example:
+    GET /person?email=test@test.test&phone=1234&first_name=test$page=1&limit=5
+
+
 # Return one person
 GET /person/id
 

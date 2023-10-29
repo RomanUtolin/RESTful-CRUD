@@ -8,22 +8,20 @@ type Person struct {
 }
 
 type PersonRepository interface {
-	GetAll(email, phone, firstName string, page, limit int) ([]*Person, error)
+	GetAll(email, phone, firstName string, limit, offset int) ([]*Person, int, error)
 	GetByID(id int) (*Person, error)
 	GetByEmail(email string) (*Person, error)
 	Create(req *Person) (*Person, error)
 	Update(id int, req *Person) (*Person, error)
 	Delete(id int) error
 	ParseData(data []byte) (*Person, error)
-	Count() (int, error)
 }
 
 type PersonLogic interface {
-	GetAll(email, phone, firstName string, page, limit int) ([]*Person, error)
+	GetAll(email, phone, firstName string, limit, offset int) ([]*Person, int, error)
 	GetByID(id int) (*Person, error)
 	GetByEmail(email string) (*Person, error)
 	Create(req *Person) (*Person, error)
 	Update(id int, req *Person) (*Person, error)
 	Delete(id int) error
-	Count() (int, error)
 }

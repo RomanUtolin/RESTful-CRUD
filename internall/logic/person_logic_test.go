@@ -28,7 +28,7 @@ func TestPersonLogic_GetAll(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetAll", "", "", "", 10, 0).Return(ListPerson, nil)
+				mockUCase.On("GetAll", "", "", "", 10, 0).Return(ListPerson, 1, nil)
 			},
 			waitErr:    nil,
 			waitResult: ListPerson,
@@ -36,7 +36,7 @@ func TestPersonLogic_GetAll(t *testing.T) {
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetAll", "", "", "", 10, 0).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetAll", "", "", "", 10, 0).Return(nil, 1, serverErr.ErrInternalServer)
 			},
 			waitErr:    serverErr.ErrInternalServer,
 			waitResult: nil,
@@ -46,7 +46,8 @@ func TestPersonLogic_GetAll(t *testing.T) {
 		mockUCase := new(mocks.PersonRepository)
 		test.mockFunc(mockUCase)
 		personLogic := logic.NewPersonLogic(mockUCase)
-		persons, err := personLogic.GetAll("", "", "", 10, 0)
+		persons, data, err := personLogic.GetAll("", "", "", 10, 0)
+		_ = data
 		assert.Equal(t, test.waitErr, err)
 		assert.Equal(t, test.waitResult, persons)
 

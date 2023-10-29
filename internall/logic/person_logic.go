@@ -13,8 +13,8 @@ func NewPersonLogic(rep entity.PersonRepository) entity.PersonLogic {
 	return &PersonLogic{rep}
 }
 
-func (p *PersonLogic) GetAll(email, phone, firstName string, page, limit int) ([]*entity.Person, error) {
-	return p.Rep.GetAll(email, phone, firstName, page, limit)
+func (p *PersonLogic) GetAll(email, phone, firstName string, limit, offset int) ([]*entity.Person, int, error) {
+	return p.Rep.GetAll(email, phone, firstName, limit, offset)
 }
 
 func (p *PersonLogic) GetByID(id int) (*entity.Person, error) {
@@ -48,9 +48,6 @@ func (p *PersonLogic) Update(id int, req *entity.Person) (*entity.Person, error)
 
 func (p *PersonLogic) Delete(id int) error {
 	return p.Rep.Delete(id)
-}
-func (p *PersonLogic) Count() (int, error) {
-	return p.Rep.Count()
 }
 
 func (p *PersonLogic) findPerson(email string) error {

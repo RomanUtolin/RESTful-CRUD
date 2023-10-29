@@ -19,15 +19,21 @@ func NewPersonRepository(db *pgxpool.Pool) entity.PersonRepository {
 	return &PersonRepository{db: db}
 }
 
-func (r *PersonRepository) GetAll(email, phone, firstName string, page, limit int) ([]*entity.Person, error) {
-	sql := `SELECT id, email, phone, first_name 
+func (r *PersonRepository) GetAll(email, phone, firstName string, limit, offset int) ([]*entity.Person, int, error) {
+	persons := make([]*entity.Person, 0)
+	count := 0
+
+	sql := `SELECT id, email, phone, first_name
 			  FROM persons
 			  WHERE email LIKE '%'||$1||'%' AND phone LIKE '%'||$2||'%' AND first_name LIKE '%'||$3||'%'
 			  ORDER BY id LIMIT $4 OFFSET $5;`
-	persons := make([]*entity.Person, 0)
+
+	sqlForCount := `SELECT COUNT(id) FROM persons;`
+
 	conn, err := r.db.Acquire(context.Background())
 	defer conn.Release()
-	rows, err := conn.Query(context.Background(), sql, email, phone, firstName, limit, (page-1)*limit)
+
+	rows, err := conn.Query(context.Background(), sql, email, phone, firstName, limit, offset)
 	for rows.Next() {
 		p := new(entity.Person)
 		err = rows.Scan(
@@ -38,12 +44,13 @@ func (r *PersonRepository) GetAll(email, phone, firstName string, page, limit in
 		)
 		persons = append(persons, p)
 	}
-	return persons, err
+	err = conn.QueryRow(context.Background(), sqlForCount).Scan(&count)
+	return persons, count, err
 }
 
 func (r *PersonRepository) GetByID(id int) (*entity.Person, error) {
-	sql := `SELECT id, email, phone, first_name FROM persons WHERE id = $1;`
 	person := new(entity.Person)
+	sql := `SELECT id, email, phone, first_name FROM persons WHERE id = $1;`
 	conn, err := r.db.Acquire(context.Background())
 	defer conn.Release()
 	err = conn.QueryRow(context.Background(), sql, id).
@@ -59,8 +66,8 @@ func (r *PersonRepository) GetByID(id int) (*entity.Person, error) {
 }
 
 func (r *PersonRepository) GetByEmail(email string) (*entity.Person, error) {
-	sql := `SELECT id, email, phone, first_name FROM persons WHERE email = $1;`
 	person := new(entity.Person)
+	sql := `SELECT id, email, phone, first_name FROM persons WHERE email = $1;`
 	conn, err := r.db.Acquire(context.Background())
 	defer conn.Release()
 	err = conn.QueryRow(context.Background(), sql, email).
@@ -109,15 +116,6 @@ func (r *PersonRepository) ParseData(data []byte) (*entity.Person, error) {
 	person := new(entity.Person)
 	err := json.Unmarshal(data, &person)
 	return person, err
-}
-
-func (r *PersonRepository) Count() (int, error) {
-	result := 0
-	sql := `SELECT COUNT(id) FROM persons;`
-	conn, err := r.db.Acquire(context.Background())
-	defer conn.Release()
-	err = conn.QueryRow(context.Background(), sql).Scan(&result)
-	return result, err
 }
 
 func getTime() string {

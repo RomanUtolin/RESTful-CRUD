@@ -12,30 +12,6 @@ type PersonRepository struct {
 	mock.Mock
 }
 
-// Count provides a mock function with given fields:
-func (_m *PersonRepository) Count() (int, error) {
-	ret := _m.Called()
-
-	var r0 int
-	var r1 error
-	if rf, ok := ret.Get(0).(func() (int, error)); ok {
-		return rf()
-	}
-	if rf, ok := ret.Get(0).(func() int); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(int)
-	}
-
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Create provides a mock function with given fields: req
 func (_m *PersonRepository) Create(req *entity.Person) (*entity.Person, error) {
 	ret := _m.Called(req)
@@ -76,30 +52,37 @@ func (_m *PersonRepository) Delete(id int) error {
 	return r0
 }
 
-// GetAll provides a mock function with given fields: email, phone, firstName, page, limit
-func (_m *PersonRepository) GetAll(email string, phone string, firstName string, page int, limit int) ([]*entity.Person, error) {
-	ret := _m.Called(email, phone, firstName, page, limit)
+// GetAll provides a mock function with given fields: email, phone, firstName, limit, offset
+func (_m *PersonRepository) GetAll(email string, phone string, firstName string, limit int, offset int) ([]*entity.Person, int, error) {
+	ret := _m.Called(email, phone, firstName, limit, offset)
 
 	var r0 []*entity.Person
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string, int, int) ([]*entity.Person, error)); ok {
-		return rf(email, phone, firstName, page, limit)
+	var r1 int
+	var r2 error
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) ([]*entity.Person, int, error)); ok {
+		return rf(email, phone, firstName, limit, offset)
 	}
 	if rf, ok := ret.Get(0).(func(string, string, string, int, int) []*entity.Person); ok {
-		r0 = rf(email, phone, firstName, page, limit)
+		r0 = rf(email, phone, firstName, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*entity.Person)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, int, int) error); ok {
-		r1 = rf(email, phone, firstName, page, limit)
+	if rf, ok := ret.Get(1).(func(string, string, string, int, int) int); ok {
+		r1 = rf(email, phone, firstName, limit, offset)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(int)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(string, string, string, int, int) error); ok {
+		r2 = rf(email, phone, firstName, limit, offset)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // GetByEmail provides a mock function with given fields: email

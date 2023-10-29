@@ -20,6 +20,13 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
+type ResponseData struct {
+	Data     []*entity.Person `json:"data"`
+	Total    int              `json:"total"`
+	Page     int              `json:"page"`
+	LastPage int              `json:"last_page"`
+}
+
 func (h *Handler) GetAllPerson(c echo.Context) error {
 	email := c.QueryParam("email")
 	phone := c.QueryParam("phone")
@@ -32,20 +39,17 @@ func (h *Handler) GetAllPerson(c echo.Context) error {
 	if err != nil {
 		limit = 10
 	}
-	persons, err := h.Logic.GetAll(email, phone, firstName, page, limit)
+	offset := (page - 1) * limit
+	persons, count, err := h.Logic.GetAll(email, phone, firstName, limit, offset)
 	if err != nil {
 		return getError(c, err)
 	}
-	total, err := h.Logic.Count()
-	if err != nil {
-		return getError(c, err)
-	}
-	lastPage := int(math.Ceil(float64(total) / float64(limit)))
-	data := echo.Map{
-		"data":      persons,
-		"total":     total,
-		"page":      page,
-		"last_page": lastPage,
+	lastPage := int(math.Ceil(float64(count) / float64(limit)))
+	data := &ResponseData{
+		Data:     persons,
+		Total:    count,
+		Page:     page,
+		LastPage: lastPage,
 	}
 	logrus.Info("Get all person Successful")
 	return c.JSON(http.StatusOK, data)
