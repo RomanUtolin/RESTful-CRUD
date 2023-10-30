@@ -20,7 +20,7 @@ func main() {
 	server.Use(middl.CORS)
 	server.Use(middl.LogRequest)
 	repository := _repository.NewPersonRepository(dbPoll)
-	logic := _logic.NewPersonLogic(repository)
+	logic := _logic.NewPersonLogic(repository, config.GetTimeoutContext())
 	http.NewHandler(server, logic)
 
 	logrus.Infof("Starting Server")

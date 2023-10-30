@@ -7,18 +7,20 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"math"
+	"time"
 )
 
 type PersonLogic struct {
-	Rep entity.PersonRepository
+	Rep            entity.PersonRepository
+	TimeoutContext time.Duration
 }
 
-func NewPersonLogic(rep entity.PersonRepository) entity.PersonLogic {
-	return &PersonLogic{rep}
+func NewPersonLogic(rep entity.PersonRepository, timeoutContext time.Duration) entity.PersonLogic {
+	return &PersonLogic{rep, timeoutContext}
 }
 
 func (p *PersonLogic) GetPersons(ctx context.Context, email, phone, firstName string, page, limit int) ([]*entity.Person, int, int, int, error) {
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithTimeout(ctx, p.TimeoutContext)
 	defer cancel()
 	var persons []*entity.Person
 	var count int
@@ -49,7 +51,7 @@ func (p *PersonLogic) GetPersons(ctx context.Context, email, phone, firstName st
 }
 
 func (p *PersonLogic) GetOnePerson(ctx context.Context, id int) (*entity.Person, error) {
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithTimeout(ctx, p.TimeoutContext)
 	defer cancel()
 	if id == 0 {
 		return nil, serverErr.ErrNotFound
@@ -62,7 +64,7 @@ func (p *PersonLogic) GetOnePerson(ctx context.Context, id int) (*entity.Person,
 }
 
 func (p *PersonLogic) Create(ctx context.Context, req *entity.Person) (*entity.Person, error) {
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithTimeout(ctx, p.TimeoutContext)
 	defer cancel()
 	err := isRequestValid(req)
 	if err != nil {
@@ -76,7 +78,7 @@ func (p *PersonLogic) Create(ctx context.Context, req *entity.Person) (*entity.P
 }
 
 func (p *PersonLogic) Update(ctx context.Context, id int, req *entity.Person) (*entity.Person, error) {
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithTimeout(ctx, p.TimeoutContext)
 	defer cancel()
 	if id == 0 {
 		return nil, serverErr.ErrNotFound
@@ -97,7 +99,7 @@ func (p *PersonLogic) Update(ctx context.Context, id int, req *entity.Person) (*
 }
 
 func (p *PersonLogic) Delete(ctx context.Context, id int) error {
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithTimeout(ctx, p.TimeoutContext)
 	defer cancel()
 	if id == 0 {
 		return serverErr.ErrNotFound
@@ -106,8 +108,6 @@ func (p *PersonLogic) Delete(ctx context.Context, id int) error {
 }
 
 func (p *PersonLogic) findPerson(ctx context.Context, email string) error {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 	person, err := p.Rep.GetByEmail(ctx, email)
 	if person != nil && err == nil {
 		err = serverErr.ErrConflict

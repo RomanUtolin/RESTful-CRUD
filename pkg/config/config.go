@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"time"
 )
 
 func init() {
@@ -45,4 +46,9 @@ func GetDb() *pgxpool.Pool {
 		logrus.Warning(err)
 	}
 	return dbPool
+}
+
+func GetTimeoutContext() time.Duration {
+	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
+	return timeoutContext
 }

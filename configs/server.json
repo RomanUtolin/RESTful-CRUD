@@ -11,5 +11,8 @@
     "pass": "password",
     "name": "dev",
     "sslmode": "disable"
+  },
+  "context": {
+    "timeout": 2
   }
 }
