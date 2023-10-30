@@ -78,7 +78,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", "", "", "", 10, 0).Return(ListTwoPerson, 2, nil)
+				mockUCase.On("GetPersons", "", "", "", 10, 0).Return(ListTwoPerson, 2, nil)
 			},
 			path:         "person",
 			waitCode:     http.StatusOK,
@@ -87,7 +87,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "valid with param email",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", "test@test.ru", "", "", 10, 0).Return(ListOnePerson, 1, nil)
+				mockUCase.On("GetPersons", "test@test.ru", "", "", 10, 0).Return(ListOnePerson, 1, nil)
 			},
 			path:         "person?email=test@test.ru",
 			waitCode:     http.StatusOK,
@@ -96,7 +96,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "valid with param phone",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", "", "1234", "", 10, 0).Return(ListOnePerson, 1, nil)
+				mockUCase.On("GetPersons", "", "1234", "", 10, 0).Return(ListOnePerson, 1, nil)
 			},
 			path:         "person?phone=1234",
 			waitCode:     http.StatusOK,
@@ -105,7 +105,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "valid with param name",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", "", "", "test", 10, 0).Return(ListOnePerson, 1, nil)
+				mockUCase.On("GetPersons", "", "", "test", 10, 0).Return(ListOnePerson, 1, nil)
 			},
 			path:         "person?first_name=test",
 			waitCode:     http.StatusOK,
@@ -114,7 +114,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "valid page=1&limit=1 all page 2",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", "", "", "", 1, 0).Return(ListOnePerson, 2, nil)
+				mockUCase.On("GetPersons", "", "", "", 1, 0).Return(ListOnePerson, 2, nil)
 			},
 			path:         "person?page=1&limit=1",
 			waitCode:     http.StatusOK,
@@ -123,7 +123,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetAll", "", "", "", 10, 0).Return(nil, 0, serverErr.ErrInternalServer)
+				mockUCase.On("GetPersons", "", "", "", 10, 0).Return(nil, 0, serverErr.ErrInternalServer)
 			},
 			path:         "person",
 			waitCode:     http.StatusInternalServerError,
@@ -143,7 +143,7 @@ func TestHandler_GetAllPerson(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		handler := personHandler.Handler{Logic: mockUCase}
-		err = handler.GetAllPerson(c)
+		err = handler.GetPersons(c)
 
 		require.NoError(t, err)
 		assert.Equal(t, test.waitCode, rec.Code)
@@ -166,7 +166,7 @@ func TestHandler_GetPerson(t *testing.T) {
 			name: "valid",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetByID", testPerson.ID).Return(testPerson, nil)
+				mockUCase.On("GetOnePerson", testPerson.ID).Return(testPerson, nil)
 			},
 			waitCode:     http.StatusOK,
 			waitResponse: string(PersonJson),
@@ -175,7 +175,7 @@ func TestHandler_GetPerson(t *testing.T) {
 			name: "store error",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetByID", testPerson.ID).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetOnePerson", testPerson.ID).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitCode:     http.StatusInternalServerError,
 			waitResponse: string(jsonErrServer),
@@ -184,7 +184,7 @@ func TestHandler_GetPerson(t *testing.T) {
 			name: "id valid, in db not found",
 			id:   "1",
 			mockFunc: func(mockUCase *mocks.PersonLogic) {
-				mockUCase.On("GetByID", testPerson.ID).Return(nil, serverErr.ErrNotFound)
+				mockUCase.On("GetOnePerson", testPerson.ID).Return(nil, serverErr.ErrNotFound)
 			},
 			waitCode:     http.StatusNotFound,
 			waitResponse: string(jsonErrNotFound),

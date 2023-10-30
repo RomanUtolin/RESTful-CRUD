@@ -4,10 +4,8 @@ import (
 	"errors"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/entity"
 	serverErr "github.com/RomanUtolin/RESTful-CRUD/internall/errors"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
-	"math"
 	"net/http"
 	"strconv"
 )
@@ -27,24 +25,18 @@ type ResponseData struct {
 	LastPage int              `json:"last_page"`
 }
 
-func (h *Handler) GetAllPerson(c echo.Context) error {
+func (h *Handler) GetPersons(c echo.Context) error {
+	ctx := c.Request().Context()
 	email := c.QueryParam("email")
 	phone := c.QueryParam("phone")
 	firstName := c.QueryParam("first_name")
-	page, err := strconv.Atoi(c.QueryParam("page"))
-	if err != nil {
-		page = 1
-	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
-	if err != nil {
-		limit = 10
-	}
-	offset := (page - 1) * limit
-	persons, count, err := h.Logic.GetAll(email, phone, firstName, limit, offset)
+	page, _ := strconv.Atoi(c.QueryParam("page"))
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+
+	persons, count, page, lastPage, err := h.Logic.GetPersons(ctx, email, phone, firstName, page, limit)
 	if err != nil {
 		return getError(c, err)
 	}
-	lastPage := int(math.Ceil(float64(count) / float64(limit)))
 	data := &ResponseData{
 		Data:     persons,
 		Total:    count,
@@ -56,11 +48,9 @@ func (h *Handler) GetAllPerson(c echo.Context) error {
 }
 
 func (h *Handler) GetPerson(c echo.Context) error {
-	id, err := parseId(c)
-	if err != nil {
-		return getError(c, err)
-	}
-	person, err := h.Logic.GetByID(id)
+	ctx := c.Request().Context()
+	id, _ := strconv.Atoi(c.Param("id"))
+	person, err := h.Logic.GetOnePerson(ctx, id)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -69,11 +59,13 @@ func (h *Handler) GetPerson(c echo.Context) error {
 }
 
 func (h *Handler) CreatePerson(c echo.Context) error {
+	ctx := c.Request().Context()
 	req := &entity.Person{}
-	if err := newPerson(c, req); err != nil {
+	err := c.Bind(req)
+	if err != nil {
 		return getError(c, err)
 	}
-	person, err := h.Logic.Create(req)
+	person, err := h.Logic.Create(ctx, req)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -82,15 +74,14 @@ func (h *Handler) CreatePerson(c echo.Context) error {
 }
 
 func (h *Handler) UpdatePerson(c echo.Context) error {
-	id, err := parseId(c)
+	ctx := c.Request().Context()
+	id, _ := strconv.Atoi(c.Param("id"))
+	req := &entity.Person{}
+	err := c.Bind(req)
 	if err != nil {
 		return getError(c, err)
 	}
-	req := &entity.Person{}
-	if err = newPerson(c, req); err != nil {
-		return getError(c, err)
-	}
-	person, err := h.Logic.Update(id, req)
+	person, err := h.Logic.Update(ctx, id, req)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -99,11 +90,9 @@ func (h *Handler) UpdatePerson(c echo.Context) error {
 }
 
 func (h *Handler) DeletePerson(c echo.Context) error {
-	id, err := parseId(c)
-	if err != nil {
-		return getError(c, err)
-	}
-	err = h.Logic.Delete(id)
+	ctx := c.Request().Context()
+	id, _ := strconv.Atoi(c.Param("id"))
+	err := h.Logic.Delete(ctx, id)
 	if err != nil {
 		return getError(c, err)
 	}
@@ -113,44 +102,11 @@ func (h *Handler) DeletePerson(c echo.Context) error {
 
 func NewHandler(e *echo.Echo, logic entity.PersonLogic) {
 	handler := &Handler{Logic: logic}
-	e.GET("/person", handler.GetAllPerson)
+	e.GET("/person", handler.GetPersons)
 	e.GET("/person/:id", handler.GetPerson)
 	e.POST("/person", handler.CreatePerson)
 	e.PUT("/person/:id", handler.UpdatePerson)
 	e.DELETE("/person/:id", handler.DeletePerson)
-}
-
-func isRequestValid(req *entity.Person) error {
-	validate := validator.New()
-	err := validate.Struct(req)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"Error":      err,
-			"Email":      req.Email,
-			"Phone":      req.Phone,
-			"First_name": req.FirstName,
-		}).Error("validate err")
-		err = serverErr.ErrBadParamInput
-	}
-	return err
-}
-
-func newPerson(c echo.Context, req *entity.Person) error {
-	err := c.Bind(req)
-	if err != nil {
-		logrus.Error(err)
-	} else {
-		err = isRequestValid(req)
-	}
-	return err
-}
-
-func parseId(c echo.Context) (int, error) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		err = serverErr.ErrNotFound
-	}
-	return id, err
 }
 
 func getError(c echo.Context, err error) error {

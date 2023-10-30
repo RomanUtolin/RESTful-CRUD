@@ -24,7 +24,7 @@ package repository_test
 //	mock.ExpectQuery(query).WillReturnRows(rows)
 //
 //	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.GetAll(getDb(db))
+//	result, err := personRepository.GetPersons(getDb(db))
 //
 //	assert.NoError(t, err)
 //	assert.NotNil(t, result)
@@ -52,7 +52,7 @@ package repository_test
 //	mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnRows(rows)
 //
 //	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.GetByID(getDb(db), testPerson.ID)
+//	result, err := personRepository.GetOnePerson(getDb(db), testPerson.ID)
 //
 //	assert.NoError(t, err)
 //	assert.NotNil(t, result)
