@@ -20,6 +20,12 @@ cd RESTful-CRUD
 ```
 make start
 ```
+### Run the test(test db in Docker)
+```
+make testDb
+
+make test
+```
 ### Routes
 ```
 # Return all person

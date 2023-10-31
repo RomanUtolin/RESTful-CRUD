@@ -22,7 +22,7 @@ type PersonRepository interface {
 	CountAll(ctx context.Context) (int, error)
 	CountAllByEmail(ctx context.Context, email string) (int, error)
 	CountAllByPhone(ctx context.Context, phone string) (int, error)
-	CountAllByFirstName(ctx context.Context, name string) (int, error)
+	CountAllByName(ctx context.Context, name string) (int, error)
 	ParseData(data []byte) (*Person, error)
 }
 

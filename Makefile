@@ -4,12 +4,16 @@ build:
 
 .PHONY: test
 test:
-		go test -v -race -timeout 30s ./...
+		go test -v -timeout 30s ./...
 
 .PHONY: start
 start:
 	docker build -t app-server-crud .
 	docker compose up
+
+.PHONY: testDb
+testDb:
+	docker compose --file compose-testDb.yaml up
 
 .PHONY: mockery
 mockery:

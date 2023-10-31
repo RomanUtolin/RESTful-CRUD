@@ -1,0 +1,16 @@
+services:
+  postgresqlTest:
+    image: postgres:14-alpine
+    container_name: ps-psql-test
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=devtest
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./migrations/create.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - psTest
+networks:
+  psTest:

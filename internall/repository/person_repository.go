@@ -50,12 +50,6 @@ func (r *PersonRepository) getOnePerson(ctx context.Context, query string, args 
 	return person, err
 }
 
-func (r *PersonRepository) editPerson(ctx context.Context, person *entity.Person, query string, args ...interface{}) (*entity.Person, error) {
-	err := r.db.QueryRow(ctx, query, args...).
-		Scan(&person.ID)
-	return person, err
-}
-
 func (r *PersonRepository) count(ctx context.Context, query, value string) (int, error) {
 	var count int
 	var err error
@@ -124,15 +118,8 @@ func (r *PersonRepository) Create(ctx context.Context, req *entity.Person) (*ent
 	sql := `INSERT INTO persons (email, phone, first_name, created_at)
 			VALUES ($1,$2,$3,$4)
 			RETURNING id;`
-	return r.editPerson(
-		ctx,
-		req,
-		sql,
-		req.Email,
-		req.Phone,
-		req.FirstName,
-		time.Now().Format(time.DateTime),
-	)
+	err := r.db.QueryRow(ctx, sql, req.Email, req.Phone, req.FirstName, time.Now().Format(time.DateTime)).Scan(&req.ID)
+	return req, err
 }
 
 func (r *PersonRepository) Update(ctx context.Context, id int, req *entity.Person) (*entity.Person, error) {
@@ -140,16 +127,8 @@ func (r *PersonRepository) Update(ctx context.Context, id int, req *entity.Perso
 			SET email = $1, phone = $2, first_name = $3, updated_at = $4
             WHERE id = $5
             RETURNING id;`
-	return r.editPerson(
-		ctx,
-		req,
-		sql,
-		req.Email,
-		req.Phone,
-		req.FirstName,
-		time.Now().Format(time.DateTime),
-		id,
-	)
+	err := r.db.QueryRow(ctx, sql, req.Email, req.Phone, req.FirstName, time.Now().Format(time.DateTime), id).Scan(&req.ID)
+	return req, err
 }
 
 func (r *PersonRepository) Delete(ctx context.Context, id int) error {
@@ -178,7 +157,7 @@ func (r *PersonRepository) CountAllByPhone(ctx context.Context, phone string) (i
 	return r.count(ctx, sql, phone)
 }
 
-func (r *PersonRepository) CountAllByFirstName(ctx context.Context, name string) (int, error) {
+func (r *PersonRepository) CountAllByName(ctx context.Context, name string) (int, error) {
 	sql := `SELECT COUNT(id) FROM persons WHERE first_name = $1;`
 	return r.count(ctx, sql, name)
 }

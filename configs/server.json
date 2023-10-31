@@ -5,7 +5,7 @@
     "address": ":8080"
   },
   "database": {
-    "host": "ps-psql ",
+    "host": "ps-psql",
     "port": "5432",
     "user": "postgres",
     "pass": "password",

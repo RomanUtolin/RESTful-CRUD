@@ -24,5 +24,6 @@ services:
       - ./migrations/create.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - ps
+
 networks:
   ps:

@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/RomanUtolin/RESTful-CRUD/internall/entity"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,25 +14,23 @@ type PersonRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: req
-func (_m *PersonRepository) Create(req *entity.Person) (*entity.Person, error) {
-	ret := _m.Called(req)
+// CountAll provides a mock function with given fields: ctx
+func (_m *PersonRepository) CountAll(ctx context.Context) (int, error) {
+	ret := _m.Called(ctx)
 
-	var r0 *entity.Person
+	var r0 int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*entity.Person) (*entity.Person, error)); ok {
-		return rf(req)
+	if rf, ok := ret.Get(0).(func(context.Context) (int, error)); ok {
+		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(*entity.Person) *entity.Person); ok {
-		r0 = rf(req)
+	if rf, ok := ret.Get(0).(func(context.Context) int); ok {
+		r0 = rf(ctx)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.Person)
-		}
+		r0 = ret.Get(0).(int)
 	}
 
-	if rf, ok := ret.Get(1).(func(*entity.Person) error); ok {
-		r1 = rf(req)
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -38,13 +38,111 @@ func (_m *PersonRepository) Create(req *entity.Person) (*entity.Person, error) {
 	return r0, r1
 }
 
-// Delete provides a mock function with given fields: id
-func (_m *PersonRepository) Delete(id int) error {
-	ret := _m.Called(id)
+// CountAllByEmail provides a mock function with given fields: ctx, email
+func (_m *PersonRepository) CountAllByEmail(ctx context.Context, email string) (int, error) {
+	ret := _m.Called(ctx, email)
+
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (int, error)); ok {
+		return rf(ctx, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) int); ok {
+		r0 = rf(ctx, email)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CountAllByName provides a mock function with given fields: ctx, name
+func (_m *PersonRepository) CountAllByName(ctx context.Context, name string) (int, error) {
+	ret := _m.Called(ctx, name)
+
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (int, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) int); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CountAllByPhone provides a mock function with given fields: ctx, phone
+func (_m *PersonRepository) CountAllByPhone(ctx context.Context, phone string) (int, error) {
+	ret := _m.Called(ctx, phone)
+
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (int, error)); ok {
+		return rf(ctx, phone)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) int); ok {
+		r0 = rf(ctx, phone)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, phone)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Create provides a mock function with given fields: ctx, req
+func (_m *PersonRepository) Create(ctx context.Context, req *entity.Person) (*entity.Person, error) {
+	ret := _m.Called(ctx, req)
+
+	var r0 *entity.Person
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Person) (*entity.Person, error)); ok {
+		return rf(ctx, req)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Person) *entity.Person); ok {
+		r0 = rf(ctx, req)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.Person)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *entity.Person) error); ok {
+		r1 = rf(ctx, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Delete provides a mock function with given fields: ctx, id
+func (_m *PersonRepository) Delete(ctx context.Context, id int) error {
+	ret := _m.Called(ctx, id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -52,58 +150,25 @@ func (_m *PersonRepository) Delete(id int) error {
 	return r0
 }
 
-// GetAll provides a mock function with given fields: email, phone, firstName, limit, offset
-func (_m *PersonRepository) GetAll(email string, phone string, firstName string, limit int, offset int) ([]*entity.Person, int, error) {
-	ret := _m.Called(email, phone, firstName, limit, offset)
+// GetAll provides a mock function with given fields: ctx, limit, offset
+func (_m *PersonRepository) GetAll(ctx context.Context, limit int, offset int) ([]*entity.Person, error) {
+	ret := _m.Called(ctx, limit, offset)
 
 	var r0 []*entity.Person
-	var r1 int
-	var r2 error
-	if rf, ok := ret.Get(0).(func(string, string, string, int, int) ([]*entity.Person, int, error)); ok {
-		return rf(email, phone, firstName, limit, offset)
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) ([]*entity.Person, error)); ok {
+		return rf(ctx, limit, offset)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, int, int) []*entity.Person); ok {
-		r0 = rf(email, phone, firstName, limit, offset)
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) []*entity.Person); ok {
+		r0 = rf(ctx, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*entity.Person)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, int, int) int); ok {
-		r1 = rf(email, phone, firstName, limit, offset)
-	} else {
-		r1 = ret.Get(1).(int)
-	}
-
-	if rf, ok := ret.Get(2).(func(string, string, string, int, int) error); ok {
-		r2 = rf(email, phone, firstName, limit, offset)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
-}
-
-// GetByEmail provides a mock function with given fields: email
-func (_m *PersonRepository) GetByEmail(email string) (*entity.Person, error) {
-	ret := _m.Called(email)
-
-	var r0 *entity.Person
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*entity.Person, error)); ok {
-		return rf(email)
-	}
-	if rf, ok := ret.Get(0).(func(string) *entity.Person); ok {
-		r0 = rf(email)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.Person)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(email)
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = rf(ctx, limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -111,25 +176,129 @@ func (_m *PersonRepository) GetByEmail(email string) (*entity.Person, error) {
 	return r0, r1
 }
 
-// GetByID provides a mock function with given fields: id
-func (_m *PersonRepository) GetByID(id int) (*entity.Person, error) {
-	ret := _m.Called(id)
+// GetAllByEmail provides a mock function with given fields: ctx, email, limit, offset
+func (_m *PersonRepository) GetAllByEmail(ctx context.Context, email string, limit int, offset int) ([]*entity.Person, error) {
+	ret := _m.Called(ctx, email, limit, offset)
+
+	var r0 []*entity.Person
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) ([]*entity.Person, error)); ok {
+		return rf(ctx, email, limit, offset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) []*entity.Person); ok {
+		r0 = rf(ctx, email, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*entity.Person)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int, int) error); ok {
+		r1 = rf(ctx, email, limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetAllByName provides a mock function with given fields: ctx, firstName, limit, offset
+func (_m *PersonRepository) GetAllByName(ctx context.Context, firstName string, limit int, offset int) ([]*entity.Person, error) {
+	ret := _m.Called(ctx, firstName, limit, offset)
+
+	var r0 []*entity.Person
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) ([]*entity.Person, error)); ok {
+		return rf(ctx, firstName, limit, offset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) []*entity.Person); ok {
+		r0 = rf(ctx, firstName, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*entity.Person)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int, int) error); ok {
+		r1 = rf(ctx, firstName, limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetAllByPhone provides a mock function with given fields: ctx, phone, limit, offset
+func (_m *PersonRepository) GetAllByPhone(ctx context.Context, phone string, limit int, offset int) ([]*entity.Person, error) {
+	ret := _m.Called(ctx, phone, limit, offset)
+
+	var r0 []*entity.Person
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) ([]*entity.Person, error)); ok {
+		return rf(ctx, phone, limit, offset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) []*entity.Person); ok {
+		r0 = rf(ctx, phone, limit, offset)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*entity.Person)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int, int) error); ok {
+		r1 = rf(ctx, phone, limit, offset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetByEmail provides a mock function with given fields: ctx, email
+func (_m *PersonRepository) GetByEmail(ctx context.Context, email string) (*entity.Person, error) {
+	ret := _m.Called(ctx, email)
 
 	var r0 *entity.Person
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) (*entity.Person, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*entity.Person, error)); ok {
+		return rf(ctx, email)
 	}
-	if rf, ok := ret.Get(0).(func(int) *entity.Person); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entity.Person); ok {
+		r0 = rf(ctx, email)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.Person)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetByID provides a mock function with given fields: ctx, id
+func (_m *PersonRepository) GetByID(ctx context.Context, id int) (*entity.Person, error) {
+	ret := _m.Called(ctx, id)
+
+	var r0 *entity.Person
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int) (*entity.Person, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int) *entity.Person); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.Person)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -163,25 +332,25 @@ func (_m *PersonRepository) ParseData(data []byte) (*entity.Person, error) {
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: id, req
-func (_m *PersonRepository) Update(id int, req *entity.Person) (*entity.Person, error) {
-	ret := _m.Called(id, req)
+// Update provides a mock function with given fields: ctx, id, req
+func (_m *PersonRepository) Update(ctx context.Context, id int, req *entity.Person) (*entity.Person, error) {
+	ret := _m.Called(ctx, id, req)
 
 	var r0 *entity.Person
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int, *entity.Person) (*entity.Person, error)); ok {
-		return rf(id, req)
+	if rf, ok := ret.Get(0).(func(context.Context, int, *entity.Person) (*entity.Person, error)); ok {
+		return rf(ctx, id, req)
 	}
-	if rf, ok := ret.Get(0).(func(int, *entity.Person) *entity.Person); ok {
-		r0 = rf(id, req)
+	if rf, ok := ret.Get(0).(func(context.Context, int, *entity.Person) *entity.Person); ok {
+		r0 = rf(ctx, id, req)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.Person)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int, *entity.Person) error); ok {
-		r1 = rf(id, req)
+	if rf, ok := ret.Get(1).(func(context.Context, int, *entity.Person) error); ok {
+		r1 = rf(ctx, id, req)
 	} else {
 		r1 = ret.Error(1)
 	}

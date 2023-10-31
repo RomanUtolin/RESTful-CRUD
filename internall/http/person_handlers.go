@@ -43,7 +43,7 @@ func (h *Handler) GetPersons(c echo.Context) error {
 		Page:     page,
 		LastPage: lastPage,
 	}
-	logrus.Info("Get all person Successful")
+	logrus.Info("Get Persons Successful")
 	return c.JSON(http.StatusOK, data)
 }
 

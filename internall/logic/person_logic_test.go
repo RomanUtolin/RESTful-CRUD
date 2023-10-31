@@ -1,12 +1,15 @@
 package logic_test
 
 import (
+	"context"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/entity"
 	serverErr "github.com/RomanUtolin/RESTful-CRUD/internall/errors"
 	"github.com/RomanUtolin/RESTful-CRUD/internall/logic"
 	"github.com/RomanUtolin/RESTful-CRUD/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"testing"
+	"time"
 )
 
 var testPerson = &entity.Person{
@@ -16,45 +19,114 @@ var testPerson = &entity.Person{
 	FirstName: "test",
 }
 
-func TestPersonLogic_GetAll(t *testing.T) {
+func TestPersonLogic_GetPersons(t *testing.T) {
 	ListPerson := make([]*entity.Person, 0)
 	ListPerson = append(ListPerson, testPerson)
 	tests := []struct {
-		name       string
-		mockFunc   func(mockUCase *mocks.PersonRepository)
-		waitErr    error
-		waitResult []*entity.Person
+		name         string
+		mockFunc     func(mockUCase *mocks.PersonRepository)
+		waitErr      error
+		waitResult   []*entity.Person
+		waitCount    int
+		waitPage     int
+		waitLastPage int
+		email        string
+		phone        string
+		firstName    string
 	}{
 		{
-			name: "valid",
+			name: "GetAllValid",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetPersons", "", "", "", 10, 0).Return(ListPerson, 1, nil)
+				mockUCase.On("GetAll", mock.Anything, 10, 0).Return(ListPerson, nil)
+				mockUCase.On("CountAll", mock.Anything).Return(1, nil)
 			},
-			waitErr:    nil,
-			waitResult: ListPerson,
+			waitErr:      nil,
+			waitResult:   ListPerson,
+			waitCount:    1,
+			waitPage:     1,
+			waitLastPage: 1,
+			email:        "",
+			phone:        "",
+			firstName:    "",
+		},
+		{
+			name: "GetAllByEmailValid",
+			mockFunc: func(mockUCase *mocks.PersonRepository) {
+				mockUCase.On("GetAllByEmail", mock.Anything, testPerson.Email, 10, 0).Return(ListPerson, nil)
+				mockUCase.On("CountAllByEmail", mock.Anything, testPerson.Email).Return(1, nil)
+			},
+			waitErr:      nil,
+			waitResult:   ListPerson,
+			waitCount:    1,
+			waitPage:     1,
+			waitLastPage: 1,
+			email:        testPerson.Email,
+			phone:        "",
+			firstName:    "",
+		},
+		{
+			name: "GetAllByPhoneValid",
+			mockFunc: func(mockUCase *mocks.PersonRepository) {
+				mockUCase.On("GetAllByPhone", mock.Anything, testPerson.Phone, 10, 0).Return(ListPerson, nil)
+				mockUCase.On("CountAllByPhone", mock.Anything, testPerson.Phone).Return(1, nil)
+			},
+			waitErr:      nil,
+			waitResult:   ListPerson,
+			waitCount:    1,
+			waitPage:     1,
+			waitLastPage: 1,
+			email:        "",
+			phone:        testPerson.Phone,
+			firstName:    "",
+		},
+		{
+			name: "GetAllByNameValid",
+			mockFunc: func(mockUCase *mocks.PersonRepository) {
+				mockUCase.On("GetAllByName", mock.Anything, testPerson.FirstName, 10, 0).Return(ListPerson, nil)
+				mockUCase.On("CountAllByName", mock.Anything, testPerson.FirstName).Return(1, nil)
+			},
+			waitErr:      nil,
+			waitResult:   ListPerson,
+			waitCount:    1,
+			waitPage:     1,
+			waitLastPage: 1,
+			email:        "",
+			phone:        "",
+			firstName:    testPerson.FirstName,
 		},
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetPersons", "", "", "", 10, 0).Return(nil, 1, serverErr.ErrInternalServer)
+				mockUCase.On("GetAll", mock.Anything, 10, 0).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("CountAll", mock.Anything).Return(0, serverErr.ErrInternalServer)
 			},
-			waitErr:    serverErr.ErrInternalServer,
-			waitResult: nil,
+			waitErr:      serverErr.ErrInternalServer,
+			waitResult:   nil,
+			waitCount:    0,
+			waitPage:     1,
+			waitLastPage: 0,
+			email:        "",
+			phone:        "",
+			firstName:    "",
 		},
 	}
 	for _, test := range tests {
 		mockUCase := new(mocks.PersonRepository)
 		test.mockFunc(mockUCase)
-		personLogic := logic.NewPersonLogic(mockUCase)
-		persons, data, err := personLogic.GetPersons("", "", "", 10, 0)
-		_ = data
+		personLogic := logic.NewPersonLogic(mockUCase, time.Second*2)
+		persons, count, page, lastPage, err := personLogic.GetPersons(context.TODO(), test.email, test.phone, test.firstName, 0, 0)
+
 		assert.Equal(t, test.waitErr, err)
 		assert.Equal(t, test.waitResult, persons)
+		assert.Equal(t, test.waitCount, count)
+		assert.Equal(t, test.waitPage, page)
+		assert.Equal(t, test.waitLastPage, lastPage)
 
 		mockUCase.AssertExpectations(t)
 	}
 }
-func TestPersonLogic_GetByID(t *testing.T) {
+
+func TestPersonLogic_GetOnePerson(t *testing.T) {
 	tests := []struct {
 		name       string
 		mockFunc   func(mockUCase *mocks.PersonRepository)
@@ -64,7 +136,7 @@ func TestPersonLogic_GetByID(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(testPerson, nil)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(testPerson, nil)
 			},
 			waitErr:    nil,
 			waitResult: testPerson,
@@ -72,7 +144,7 @@ func TestPersonLogic_GetByID(t *testing.T) {
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitErr:    serverErr.ErrInternalServer,
 			waitResult: nil,
@@ -80,7 +152,7 @@ func TestPersonLogic_GetByID(t *testing.T) {
 		{
 			name: "not found",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(nil, serverErr.ErrNotFound)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(nil, serverErr.ErrNotFound)
 			},
 			waitErr:    serverErr.ErrNotFound,
 			waitResult: nil,
@@ -89,8 +161,8 @@ func TestPersonLogic_GetByID(t *testing.T) {
 	for _, test := range tests {
 		mockUCase := new(mocks.PersonRepository)
 		test.mockFunc(mockUCase)
-		personLogic := logic.NewPersonLogic(mockUCase)
-		person, err := personLogic.GetOnePerson(testPerson.ID)
+		personLogic := logic.NewPersonLogic(mockUCase, time.Second*2)
+		person, err := personLogic.GetOnePerson(context.TODO(), testPerson.ID)
 		assert.Equal(t, test.waitErr, err)
 		assert.Equal(t, test.waitResult, person)
 
@@ -108,8 +180,8 @@ func TestPersonLogic_Create(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetByEmail", testPerson.Email).Return(nil, nil)
-				mockUCase.On("Create", testPerson).Return(testPerson, nil)
+				mockUCase.On("GetByEmail", mock.Anything, testPerson.Email).Return(nil, nil)
+				mockUCase.On("Create", mock.Anything, testPerson).Return(testPerson, nil)
 			},
 			waitErr:    nil,
 			waitResult: testPerson,
@@ -117,8 +189,8 @@ func TestPersonLogic_Create(t *testing.T) {
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetByEmail", testPerson.Email).Return(nil, nil)
-				mockUCase.On("Create", testPerson).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetByEmail", mock.Anything, testPerson.Email).Return(nil, nil)
+				mockUCase.On("Create", mock.Anything, testPerson).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitErr:    serverErr.ErrInternalServer,
 			waitResult: nil,
@@ -126,7 +198,7 @@ func TestPersonLogic_Create(t *testing.T) {
 		{
 			name: "Conflict Data in db",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetByEmail", testPerson.Email).Return(testPerson, nil)
+				mockUCase.On("GetByEmail", mock.Anything, testPerson.Email).Return(testPerson, nil)
 			},
 			waitErr:    serverErr.ErrConflict,
 			waitResult: nil,
@@ -135,8 +207,8 @@ func TestPersonLogic_Create(t *testing.T) {
 	for _, test := range tests {
 		mockUCase := new(mocks.PersonRepository)
 		test.mockFunc(mockUCase)
-		personLogic := logic.NewPersonLogic(mockUCase)
-		person, err := personLogic.Create(testPerson)
+		personLogic := logic.NewPersonLogic(mockUCase, time.Second*2)
+		person, err := personLogic.Create(context.TODO(), testPerson)
 		assert.Equal(t, test.waitErr, err)
 		assert.Equal(t, test.waitResult, person)
 
@@ -154,9 +226,9 @@ func TestPersonLogic_Update(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(testPerson, nil)
-				mockUCase.On("GetByEmail", testPerson.Email).Return(nil, nil)
-				mockUCase.On("Update", testPerson.ID, testPerson).Return(testPerson, nil)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(testPerson, nil)
+				mockUCase.On("GetByEmail", mock.Anything, testPerson.Email).Return(nil, nil)
+				mockUCase.On("Update", mock.Anything, testPerson.ID, testPerson).Return(testPerson, nil)
 			},
 			waitErr:    nil,
 			waitResult: testPerson,
@@ -164,7 +236,7 @@ func TestPersonLogic_Update(t *testing.T) {
 		{
 			name: "invalid id",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(nil, serverErr.ErrNotFound)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(nil, serverErr.ErrNotFound)
 			},
 			waitErr:    serverErr.ErrNotFound,
 			waitResult: nil,
@@ -172,9 +244,9 @@ func TestPersonLogic_Update(t *testing.T) {
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(testPerson, nil)
-				mockUCase.On("GetByEmail", testPerson.Email).Return(nil, nil)
-				mockUCase.On("Update", testPerson.ID, testPerson).Return(nil, serverErr.ErrInternalServer)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(testPerson, nil)
+				mockUCase.On("GetByEmail", mock.Anything, testPerson.Email).Return(nil, nil)
+				mockUCase.On("Update", mock.Anything, testPerson.ID, testPerson).Return(nil, serverErr.ErrInternalServer)
 			},
 			waitErr:    serverErr.ErrInternalServer,
 			waitResult: nil,
@@ -182,8 +254,8 @@ func TestPersonLogic_Update(t *testing.T) {
 		{
 			name: "Conflict Data in db",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("GetOnePerson", testPerson.ID).Return(testPerson, nil)
-				mockUCase.On("GetByEmail", testPerson.Email).Return(testPerson, nil)
+				mockUCase.On("GetByID", mock.Anything, testPerson.ID).Return(testPerson, nil)
+				mockUCase.On("GetByEmail", mock.Anything, testPerson.Email).Return(testPerson, nil)
 			},
 			waitErr:    serverErr.ErrConflict,
 			waitResult: nil,
@@ -192,8 +264,8 @@ func TestPersonLogic_Update(t *testing.T) {
 	for _, test := range tests {
 		mockUCase := new(mocks.PersonRepository)
 		test.mockFunc(mockUCase)
-		personLogic := logic.NewPersonLogic(mockUCase)
-		person, err := personLogic.Update(testPerson.ID, testPerson)
+		personLogic := logic.NewPersonLogic(mockUCase, time.Second*2)
+		person, err := personLogic.Update(context.TODO(), testPerson.ID, testPerson)
 		assert.Equal(t, test.waitErr, err)
 		assert.Equal(t, test.waitResult, person)
 
@@ -210,21 +282,21 @@ func TestPersonLogic_Delete(t *testing.T) {
 		{
 			name: "valid",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("Delete", testPerson.ID).Return(nil)
+				mockUCase.On("Delete", mock.Anything, testPerson.ID).Return(nil)
 			},
 			waitErr: nil,
 		},
 		{
 			name: "store error",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("Delete", testPerson.ID).Return(serverErr.ErrInternalServer)
+				mockUCase.On("Delete", mock.Anything, testPerson.ID).Return(serverErr.ErrInternalServer)
 			},
 			waitErr: serverErr.ErrInternalServer,
 		},
 		{
 			name: "not found",
 			mockFunc: func(mockUCase *mocks.PersonRepository) {
-				mockUCase.On("Delete", testPerson.ID).Return(serverErr.ErrNotFound)
+				mockUCase.On("Delete", mock.Anything, testPerson.ID).Return(serverErr.ErrNotFound)
 			},
 			waitErr: serverErr.ErrNotFound,
 		},
@@ -232,8 +304,8 @@ func TestPersonLogic_Delete(t *testing.T) {
 	for _, test := range tests {
 		mockUCase := new(mocks.PersonRepository)
 		test.mockFunc(mockUCase)
-		personLogic := logic.NewPersonLogic(mockUCase)
-		err := personLogic.Delete(testPerson.ID)
+		personLogic := logic.NewPersonLogic(mockUCase, time.Second*2)
+		err := personLogic.Delete(context.TODO(), testPerson.ID)
 		assert.Equal(t, test.waitErr, err)
 
 		mockUCase.AssertExpectations(t)

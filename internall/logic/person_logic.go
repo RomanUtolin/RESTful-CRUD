@@ -41,7 +41,7 @@ func (p *PersonLogic) GetPersons(ctx context.Context, email, phone, firstName st
 		count, err = p.Rep.CountAllByPhone(ctx, phone)
 	case firstName != "":
 		persons, err = p.Rep.GetAllByName(ctx, firstName, limit, offset)
-		count, err = p.Rep.CountAllByFirstName(ctx, firstName)
+		count, err = p.Rep.CountAllByName(ctx, firstName)
 	default:
 		persons, err = p.Rep.GetAll(ctx, limit, offset)
 		count, err = p.Rep.CountAll(ctx)

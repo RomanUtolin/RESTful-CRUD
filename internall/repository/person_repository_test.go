@@ -1,187 +1,273 @@
 package repository_test
 
-//var testPerson = &entity.Person{
-//	ID:        1,
-//	Email:     "test@test.ru",
-//	Phone:     "8999",
-//	FirstName: "test",
-//}
-//func TestPersonRepository_GetAll(t *testing.T) {
-//	ListPerson := make([]*entity.Person, 0)
-//	ListPerson = append(ListPerson, testPerson)
-//	db, mock, err := sqlmock.New()
-//	require.NoError(t, err)
-//	defer func() {
-//		mock.ExpectClose()
-//		db.Close()
-//	}()
-//
-//	query := `SELECT (id, email, phone, first_name) FROM persons`
-//
-//	rows := sqlmock.NewRows([]string{"id", "email", "phone", "first_name"}).
-//		AddRow(testPerson.ID, testPerson.Email, testPerson.Phone, testPerson.FirstName)
-//
-//	mock.ExpectQuery(query).WillReturnRows(rows)
-//
-//	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.GetPersons(getDb(db))
-//
-//	assert.NoError(t, err)
-//	assert.NotNil(t, result)
-//	assert.Equal(t, ListPerson, result)
-//
-//	require.NoError(t, mock.ExpectationsWereMet())
-//}
-//
-//func TestPersonRepository_GetByID(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	require.NoError(t, err)
-//	defer func() {
-//		mock.ExpectClose()
-//		db.Close()
-//	}()
-//
-//	query := fmt.Sprintf(
-//		`SELECT id, email, phone, first_name
-//		FROM persons WHERE (id = %v)`,
-//		testPerson.ID)
-//
-//	rows := sqlmock.NewRows([]string{"id", "email", "phone", "first_name"}).
-//		AddRow(testPerson.ID, testPerson.Email, testPerson.Phone, testPerson.FirstName)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnRows(rows)
-//
-//	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.GetOnePerson(getDb(db), testPerson.ID)
-//
-//	assert.NoError(t, err)
-//	assert.NotNil(t, result)
-//	assert.Equal(t, testPerson, result)
-//
-//	require.NoError(t, mock.ExpectationsWereMet())
-//}
-//
-//func TestPersonRepository_GetByEmail(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	require.NoError(t, err)
-//	defer func() {
-//		mock.ExpectClose()
-//		db.Close()
-//	}()
-//
-//	query := fmt.Sprintf(
-//		`SELECT id, email, phone, first_name
-//		FROM persons WHERE (email = '%v')`,
-//		testPerson.Email)
-//
-//	rows := sqlmock.NewRows([]string{"id", "email", "phone", "first_name"}).
-//		AddRow(testPerson.ID, testPerson.Email, testPerson.Phone, testPerson.FirstName)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnRows(rows)
-//
-//	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.GetByEmail(getDb(db), testPerson.Email)
-//
-//	assert.NoError(t, err)
-//	assert.NotNil(t, result)
-//	assert.Equal(t, testPerson, result)
-//
-//	require.NoError(t, mock.ExpectationsWereMet())
-//}
-//
-//func TestPersonRepository_Create(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	require.NoError(t, err)
-//	defer func() {
-//		mock.ExpectClose()
-//		db.Close()
-//	}()
-//
-//	query := fmt.Sprintf(
-//		`INSERT INTO "persons" ("email","phone","first_name","created_at")
-//		VALUES ('%v','%v','%v','%v') RETURNING "id"`,
-//		testPerson.Email,
-//		testPerson.Phone,
-//		testPerson.FirstName,
-//		time.Now().Format(time.DateTime))
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(query)).
-//		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-//	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.Create(getDb(db), testPerson)
-//
-//	assert.NoError(t, err)
-//	assert.NotNil(t, result)
-//	assert.Equal(t, testPerson, result)
-//
-//	require.NoError(t, mock.ExpectationsWereMet())
-//}
-//
-//func TestPersonRepository_Update(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	require.NoError(t, err)
-//	defer func() {
-//		mock.ExpectClose()
-//		db.Close()
-//	}()
-//
-//	query := fmt.Sprintf(
-//		`UPDATE "persons"
-//		SET "email" = '%v', "phone" = '%v', "first_name" = '%v', "updated_at" = '%v'
-//       WHERE (id = %v) RETURNING "id"`,
-//		testPerson.Email,
-//		testPerson.Phone,
-//		testPerson.FirstName,
-//		time.Now().Format(time.DateTime),
-//		testPerson.ID)
-//
-//	mock.ExpectQuery(regexp.QuoteMeta(query)).
-//		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-//	personRepository := repository.NewPersonRepository()
-//	result, err := personRepository.Update(getDb(db), testPerson.ID, testPerson)
-//
-//	assert.NoError(t, err)
-//	assert.NotNil(t, result)
-//	assert.Equal(t, testPerson, result)
-//
-//	require.NoError(t, mock.ExpectationsWereMet())
-//}
-//
-//func TestPersonRepository_Delete(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	require.NoError(t, err)
-//	defer func() {
-//		mock.ExpectClose()
-//		db.Close()
-//	}()
-//
-//	query := fmt.Sprintf(`DELETE FROM "persons" WHERE (id = %v)`, testPerson.ID)
-//	mock.ExpectExec(regexp.QuoteMeta(query)).WillReturnResult(sqlmock.NewResult(1, 1))
-//
-//	personRepository := repository.NewPersonRepository()
-//	err = personRepository.Delete(getDb(db), testPerson.ID)
-//
-//	assert.NoError(t, err)
-//
-//	require.NoError(t, mock.ExpectationsWereMet())
-//}
-//
-//func TestPersonRepository_ParseData(t *testing.T) {
-//	personRepository := repository.NewPersonRepository()
-//	PersonJson, _ := json.Marshal(testPerson)
-//	result, err := personRepository.ParseData(PersonJson)
-//	assert.NoError(t, err)
-//	assert.NotNil(t, result)
-//	assert.Equal(t, testPerson, result)
-//}
-//
-//func getDb(db *sql.DB) context.Context {
-//	conn := &dbr.Connection{
-//		DB:            db,
-//		EventReceiver: &dbr.NullEventReceiver{},
-//		Dialect:       dialect.PostgreSQL,
-//	}
-//	sess := conn.NewSession(nil)
-//	ctx := context.WithValue(context.Background(), constants.DbConn, sess)
-//	return ctx
-//}
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/RomanUtolin/RESTful-CRUD/internall/entity"
+	serverErr "github.com/RomanUtolin/RESTful-CRUD/internall/errors"
+	"github.com/RomanUtolin/RESTful-CRUD/internall/repository"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
+
+var (
+	testPerson1         = &entity.Person{ID: 1, Email: "test@test.ru", Phone: "1234", FirstName: "test"}
+	testPerson2         = &entity.Person{ID: 2, Email: "test2@test.ru", Phone: "5678", FirstName: "test2"}
+	testPersonForUpdate = &entity.Person{Email: "updated@test.ru", Phone: "9999", FirstName: "updated"}
+	testPerson3         = &entity.Person{ID: 3, Email: "test3@test.ru", Phone: "1234", FirstName: "test"}
+)
+
+func GetTestDb() *pgxpool.Pool {
+	dbHost := "localhost"
+	dbPort := "5433"
+	dbUser := "postgres"
+	dbPass := "password"
+	dbName := "devtest"
+	sslMode := "disable"
+	dbUrl := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		dbHost, dbPort, dbUser, dbPass, dbName, sslMode)
+	ctx := context.Background()
+	dbPool, err := pgxpool.New(ctx, dbUrl)
+	if err != nil {
+		logrus.Warning(err)
+	}
+	return dbPool
+}
+
+func truncate(ctx context.Context, db *pgxpool.Pool) {
+	sql := `TRUNCATE persons CASCADE;`
+	db.Exec(ctx, sql)
+}
+
+func TestPersonRepository_GetAll(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	ListPerson := make([]*entity.Person, 0)
+	ListPerson = append(ListPerson, testPerson1)
+	ListPerson = append(ListPerson, testPerson2)
+	result, err := rep.GetAll(ctx, 10, 0)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, ListPerson, result)
+}
+
+func TestPersonRepository_GetAllByEmail(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	ListPerson := make([]*entity.Person, 0)
+	ListPerson = append(ListPerson, testPerson1)
+	result, err := rep.GetAllByEmail(ctx, testPerson1.Email, 10, 0)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, ListPerson, result)
+}
+func TestPersonRepository_GetAllByName(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	rep.Create(ctx, testPerson3)
+	ListPerson := make([]*entity.Person, 0)
+	ListPerson = append(ListPerson, testPerson1)
+	ListPerson = append(ListPerson, testPerson3)
+	result, err := rep.GetAllByName(ctx, testPerson1.FirstName, 10, 0)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, ListPerson, result)
+}
+
+func TestPersonRepository_GetAllByPhone(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	rep.Create(ctx, testPerson3)
+	ListPerson := make([]*entity.Person, 0)
+	ListPerson = append(ListPerson, testPerson1)
+	ListPerson = append(ListPerson, testPerson3)
+	result, err := rep.GetAllByPhone(ctx, testPerson1.Phone, 10, 0)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, ListPerson, result)
+}
+
+func TestPersonRepository_GetByID(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	result, err := rep.GetByID(ctx, testPerson1.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, testPerson1, result)
+}
+
+func TestPersonRepository_GetByEmail(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	result, err := rep.GetByEmail(ctx, testPerson1.Email)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, testPerson1, result)
+}
+
+func TestPersonRepository_Create(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	result, err := rep.Create(ctx, testPerson1)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, testPerson1, result)
+}
+func TestPersonRepository_Update(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	person, _ := rep.Create(ctx, testPerson1)
+	result, err := rep.Update(ctx, person.ID, testPersonForUpdate)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, testPersonForUpdate, result)
+}
+func TestPersonRepository_Delete(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	person, _ := rep.Create(ctx, testPerson1)
+	err := rep.Delete(ctx, person.ID)
+	assert.NoError(t, err)
+	err = rep.Delete(ctx, person.ID)
+	assert.Equal(t, err, serverErr.ErrNotFound)
+}
+
+func TestPersonRepository_CountAll(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	rep.Create(ctx, testPerson3)
+	result, err := rep.CountAll(ctx)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 3, result)
+}
+
+func TestPersonRepository_CountAllByEmail(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	rep.Create(ctx, testPerson3)
+	result, err := rep.CountAllByEmail(ctx, testPerson1.Email)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 1, result)
+}
+
+func TestPersonRepository_CountAllByName(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	rep.Create(ctx, testPerson3)
+	result, err := rep.CountAllByName(ctx, testPerson1.FirstName)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 2, result)
+}
+
+func TestPersonRepository_CountAllByPhone(t *testing.T) {
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	rep.Create(ctx, testPerson1)
+	rep.Create(ctx, testPerson2)
+	rep.Create(ctx, testPerson3)
+	result, err := rep.CountAllByPhone(ctx, testPerson1.Phone)
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, 2, result)
+}
+
+func TestPersonRepository_ParseData(t *testing.T) {
+	data, _ := json.Marshal(testPerson1)
+	ctx := context.Background()
+	dbPoll := GetTestDb()
+	defer func() {
+		truncate(ctx, dbPoll)
+		dbPoll.Close()
+	}()
+	rep := repository.NewPersonRepository(dbPoll)
+	result, err := rep.ParseData(data)
+	assert.NoError(t, err)
+	assert.Equal(t, testPerson1, result)
+}
